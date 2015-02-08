@@ -139,23 +139,23 @@ impl<P: Key> BeforeMiddleware for Write<P> where P::Value: Send {
 }
 
 impl<P: Key> AfterMiddleware for State<P> where P::Value: Send + Sync {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<State<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
 impl<P: Key> AfterMiddleware for Read<P> where P::Value: Send + Sync {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<Read<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
 impl<P: Key> AfterMiddleware for Write<P> where P::Value: Send {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<Write<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
