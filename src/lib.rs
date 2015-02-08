@@ -1,6 +1,6 @@
 #![cfg_attr(test, deny(warnings))]
-#![allow(unstable)]
 #![deny(missing_docs)]
+#![feature(core)]
 
 //! A set of middleware for sharing data between requests in the Iron
 //! framework.
