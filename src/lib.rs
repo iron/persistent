@@ -1,6 +1,6 @@
 #![cfg_attr(test, deny(warnings))]
-#![allow(unstable)]
 #![deny(missing_docs)]
+#![feature(core)]
 
 //! A set of middleware for sharing data between requests in the Iron
 //! framework.
@@ -99,20 +99,20 @@ impl<P: Key> Key for Write<P> where P::Value: 'static {
     type Value = Arc<Mutex<P::Value>>;
 }
 
-impl<P: Key> Plugin<Request> for State<P> where P::Value: Send + Sync {
-    fn eval(req: &mut Request, _: Phantom<State<P>>) -> Option<Arc<RwLock<P::Value>>> {
+impl<'a, P: Key> Plugin<Request<'a>> for State<P> where P::Value: Send + Sync {
+    fn eval(req: &mut Request<'a>, _: Phantom<State<P>>) -> Option<Arc<RwLock<P::Value>>> {
         req.extensions.get::<State<P>>().cloned()
     }
 }
 
-impl<P: Key> Plugin<Request> for Read<P> where P::Value: Send + Sync {
-    fn eval(req: &mut Request, _: Phantom<Read<P>>) -> Option<Arc<P::Value>> {
+impl<'a, P: Key> Plugin<Request<'a>> for Read<P> where P::Value: Send + Sync {
+    fn eval(req: &mut Request<'a>, _: Phantom<Read<P>>) -> Option<Arc<P::Value>> {
         req.extensions.get::<Read<P>>().cloned()
     }
 }
 
-impl<P: Key> Plugin<Request> for Write<P> where P::Value: Send {
-    fn eval(req: &mut Request, _: Phantom<Write<P>>) -> Option<Arc<Mutex<P::Value>>> {
+impl<'a, P: Key> Plugin<Request<'a>> for Write<P> where P::Value: Send {
+    fn eval(req: &mut Request<'a>, _: Phantom<Write<P>>) -> Option<Arc<Mutex<P::Value>>> {
         req.extensions.get::<Write<P>>().cloned()
     }
 }
@@ -139,23 +139,23 @@ impl<P: Key> BeforeMiddleware for Write<P> where P::Value: Send {
 }
 
 impl<P: Key> AfterMiddleware for State<P> where P::Value: Send + Sync {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<State<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
 impl<P: Key> AfterMiddleware for Read<P> where P::Value: Send + Sync {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<Read<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
 impl<P: Key> AfterMiddleware for Write<P> where P::Value: Send {
-    fn after(&self, _: &mut Request, res: &mut Response) -> IronResult<()> {
+    fn after(&self, _: &mut Request, mut res: Response) -> IronResult<Response> {
         res.extensions.insert::<Write<P>>(self.data.clone());
-        Ok(())
+        Ok(res)
     }
 }
 
