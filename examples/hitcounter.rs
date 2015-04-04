@@ -7,7 +7,7 @@ use persistent::Write;
 use iron::typemap::Key;
 use iron::{status};
 
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct HitCounter;
 
 impl Key for HitCounter { type Value = usize; }
@@ -25,4 +25,3 @@ fn main() {
     chain.link(Write::<HitCounter>::both(0));
     Iron::new(chain).http("localhost:3000").unwrap();
 }
-
