@@ -10,6 +10,7 @@ extern crate plugin;
 use iron::{Request, Response, BeforeMiddleware, AfterMiddleware, IronResult};
 use iron::typemap::Key;
 use std::sync::{Arc, RwLock, Mutex};
+use std::{error,fmt};
 use plugin::Plugin;
 
 /// The type that can be returned by `eval` to indicate error.
@@ -17,6 +18,22 @@ use plugin::Plugin;
 pub enum PersistentError {
     /// The value was not found.
     NotFound
+}
+
+impl fmt::Display for PersistentError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            PersistentError::NotFound => fmt::Display::fmt("value was not found", f)
+        }
+    }
+}
+
+impl error::Error for PersistentError {
+    fn description(&self) -> &str {
+        match *self {
+            PersistentError::NotFound => "value was not found"
+        }
+    }
 }
 
 /// Middleware for data that persists between requests with read and write capabilities.
