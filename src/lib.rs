@@ -22,16 +22,14 @@ pub enum PersistentError {
 
 impl fmt::Display for PersistentError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        match *self {
-            PersistentError::NotFound => fmt::Display::fmt("value was not found", f)
-        }
+        fmt::Display::fmt(self, f)
     }
 }
 
 impl error::Error for PersistentError {
     fn description(&self) -> &str {
         match *self {
-            PersistentError::NotFound => "value was not found"
+            PersistentError::NotFound => "Value not found in extensions."
         }
     }
 }
