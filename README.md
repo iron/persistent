@@ -6,23 +6,29 @@ persistent [![Build Status](https://secure.travis-ci.org/iron/persistent.png?bra
 ## Example
 
 ```rust
-use iron::Plugin; // Request::get is provided through this trait.
+use iron::prelude::*;
 
+use persistent::Write;
+use iron::typemap::Key;
+use iron::{status};
+
+#[derive(Copy, Clone)]
 pub struct HitCounter;
-impl Assoc<uint> for HitCounter {}
+
+impl Key for HitCounter { type Value = usize; }
 
 fn serve_hits(req: &mut Request) -> IronResult<Response> {
-    let mutex = req.get::<Write<HitCounter, uint>>().unwrap();
-    let mut count = mutex.lock();
+    let mutex = req.get::<Write<HitCounter>>().unwrap();
+    let mut count = mutex.lock().unwrap();
 
     *count += 1;
-    Ok(Response::with(status::Ok, format!("Hits: {}", *count)))
+    Ok(Response::with((status::Ok, format!("Hits: {}", *count))))
 }
 
 fn main() {
-    let mut chain = ChainBuilder::new(serve_hits);
-    chain.link(Write::<HitCounter, uint>::both(0u));
-    Iron::new(chain).listen(Ipv4Addr(127, 0, 0, 1), 3000);
+    let mut chain = Chain::new(serve_hits);
+    chain.link(Write::<HitCounter>::both(0));
+    Iron::new(chain).http("localhost:3000").unwrap();
 }
 ```
 
