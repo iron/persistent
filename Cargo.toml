@@ -10,5 +10,5 @@ license = "MIT"
 keywords = ["iron", "web", "persistence", "sharing", "global"]
 
 [dependencies]
-iron = "0.5"
+iron = "0.6"
 plugin = "0.2"
